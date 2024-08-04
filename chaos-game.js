@@ -20,16 +20,18 @@ class ChaosGame {
         let angle = -Math.PI / 2;
         for (let i = 0; i < numberOfPoints; i++) {
             const center = drawer.center();
-            const x = Math.floor(center.x + radius * Math.cos(angle)) + (1/2 - 1 / factor) * centralizeX;
-            const y = Math.floor(center.y + radius * Math.sin(angle)) + (1/2 - 1 / factor) * centralizeY;
+            const x = Math.floor(center.x + radius * Math.cos(angle) + centralizeX);
+            const y = Math.floor(center.y + radius * Math.sin(angle) + centralizeY);
             points.push({ x: x, y: y });
             angle += (2 * Math.PI) / numberOfPoints;
         }
 
+        console.log(centralizeX, centralizeY)
+        console.log(points)
+
         let repitionCounter = repeat;
         let lastDrawnPoint = null;
         let lastChosenPoint = -1;
-        const allPoints = [];
         while (repitionCounter--) {
             let randomPoint = Math.floor(Math.random() * points.length);
 
@@ -45,8 +47,6 @@ class ChaosGame {
                 randomPoint = Math.floor(Math.random() * points.length);
                 retries++;
             }
-            
-            allPoints.push(randomPoint);
             
             if (lastDrawnPoint === null) {
                 lastDrawnPoint = points[randomPoint];
@@ -66,6 +66,5 @@ class ChaosGame {
             lastChosenPoint = randomPoint;
         }
 
-        console.log(allPoints);
     }
 }

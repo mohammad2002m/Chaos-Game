@@ -62,6 +62,7 @@
                   <p> Press to <strong>S</strong> to starting drawing the first configuration </p>
                   <p> Press to <strong>C</strong> Terminate the Drawing </p>
                   <p> Press to <strong>Arrow Up&Down</strong> to navigate between configurations </p>
+                  <p> You can use centralizeX and centeralizeY value to put the fractal in the middle </p>
                 </fieldset>
               </div>
             </div>
@@ -162,8 +163,6 @@
       </div>
     </main>
 
-
-
     <script>
       let startButton = document.getElementById("start");
       let clearButton = document.getElementById("clear");
@@ -225,7 +224,7 @@
         }
 
         const chunckSize = 1500;
-
+        console.log(centeralizeX, centeralizeY);
         // put values into an object and convert them to integers
         const configuration = {
           repeat: chunckSize,
@@ -234,9 +233,9 @@
           factor: parseFloat(factor),
           avoidBackward: parseInt(avoidBackward),
           avoidForward: parseInt(avoidForward),
-          centralizeX: window.innerWidth,
-          centralizeY: window.innerHeight,
-          avoidLast: avoidLast,
+          centralizeX: parseInt(centeralizeX),
+          centralizeY: parseInt(centeralizeY),
+          avoidLast: parseInt(avoidLast),
           coloring: coloring,
           colors: colors,
         };
