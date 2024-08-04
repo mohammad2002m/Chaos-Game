@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chaos Game</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <div id="frame">
+        <div class="d-flex">
+          <div id="sidebar">
+            <div style="padding: 15px">
+              <h1 style="margin-bottom: 15px">Chaos Game</h1>
+              <table style="margin-bottom: 8px; width: 100%;" border="1">
+                <tbody>
+                  <tr>
+                    <td class="pr-1"><label for=""> Points </label></td>
+                    <td><input style="width: 100%" type="text" name="number-of-points" /></td>
+                  </tr>
+                  <tr>
+                    <td class="pr-1"><label for=""> Backward </label></td>
+                    <td><input style="width: 100%" type="text" name="avoid-backward" /></td>
+                  </tr>
+                  <tr>
+                    <td class="pr-1"><label for=""> Forward </label></td>
+                    <td><input style="width: 100%" type="text" name="avoid-forward" /></td>
+                  </tr>
+                  <tr>
+                    <td class="pr-1"><label for=""> Factor </label></td>
+                    <td><input style="width: 100%" type="text" name="factor" /></td>
+                  </tr>
+                  <tr>
+                    <td class="pr-1"><label for=""> Radius </label></td>
+                    <td><input style="width: 100%" type="text" name="radius" /></td>
+                  </tr>
+                  <tr>
+                    <td><label for=""> CenteralizeY </label></td>
+                    <td><input style="width: 100%" type="text" name="centeralize-x" /></td>
+                  </tr>
+                  <tr>
+                    <td><label for=""> CenteralizeX </label></td>
+                    <td><input style="width: 100%" type="text" name="centeralize-y" /></td>
+                  <tr>
+                    <td><label for=""> Duplicate </label></td>
+                    <td><input style="width: 100%" type="text" name="avoid-last" /></td>
+                  </tr>
+                  <tr>
+                    <td><label for=""> Coloring </label></td>
+                    <td><input style="width: 100%" type="checkbox" name="coloring" /></td>
+                  </tr>
+                </tbody>
+              </table>
+              <div>
+                <button id="clear">Clear</button>
+                <button id="start">Start</button>
+              </div>
+              <div>
+                <fieldset>
+                  <legend>How to use?</legend>
+                  <p> Press to <strong>S</strong> to starting drawing the first configuration </p>
+                  <p> Press to <strong>C</strong> Terminate the Drawing </p>
+                  <p> Press to <strong>Arrow Up&Down</strong> to navigate between configurations </p>
+                </fieldset>
+              </div>
+            </div>
+
+            <script src="js/drawer.js"></script>
+            <script src="js/helpers.js"></script>
+            <script src="js/validator.js"></script>
+            <script src="chaos-game.js"></script>
+            <script src="configurations.js"></script>
+
+            <script>
+              // globals
+              let lastDrawenConfiguration = null;
+              let drawingProcess = null;
+            </script>
+
+            <script>
+              // create buttons for configurations & add event listener
+              configurations.forEach((configuration,index) => {
+                const button = document.createElement("button");
+                button.id = `configuration-${index + 1}`;
+                button.classList.add("option-button");
+                button.innerHTML = `Configuration ${index + 1}`;
+                button.addEventListener("click", () => {
+                  document.querySelector("input[name='number-of-points']").value = configuration.numberOfPoints;
+                  document.querySelector("input[name='radius']").value = configuration.radius;
+                  document.querySelector("input[name='factor']").value = configuration.factor;
+                  document.querySelector("input[name='avoid-last']").value = configuration.avoidLast;
+                  document.querySelector("input[name='avoid-backward']").value = configuration.avoidBackward;
+                  document.querySelector("input[name='avoid-forward']").value = configuration.avoidForward;
+                  document.querySelector("input[name='centeralize-x']").value = configuration.centralizeX;
+                  document.querySelector("input[name='centeralize-y']").value = configuration.centralizeY;
+                  ValidateAndDraw();
+                  unfocusConfigurationButtons();
+                  button.style.backgroundColor = "black";
+                  button.style.color = "white";
+                  lastDrawenConfiguration = index + 1;
+                });
+                document.getElementById("sidebar").appendChild(button);
+              }) 
+            </script>
+            
+            <script>
+              // keyboard down arrow on click event
+              function unfocusConfigurationButtons() {
+                const buttons = document.querySelectorAll(".option-button");
+                buttons.forEach((button) => {
+                  button.style.backgroundColor = "white";
+                  button.style.color = "black";
+                });
+              }
+
+              document.addEventListener("keydown", function (event) {
+                if (event.key === "ArrowDown" && lastDrawenConfiguration && lastDrawenConfiguration < configurations.length) {
+                    unfocusConfigurationButtons();
+                    lastDrawenConfiguration++;
+                    const button = document.getElementById(`configuration-${lastDrawenConfiguration}`);
+                    button.style.backgroundColor = "black";
+                    button.style.color = "white";
+                    button.click();
+                }
+
+                if (event.key === "ArrowUp" && lastDrawenConfiguration && lastDrawenConfiguration > 1) {
+                    unfocusConfigurationButtons();
+                    lastDrawenConfiguration--;
+                    const button = document.getElementById(`configuration-${lastDrawenConfiguration}`);
+                    button.style.backgroundColor = "black";
+                    button.style.color = "white";
+                    button.click();
+                }
+
+                // set the configuration to the first one when S is pressed
+                if (event.key === "s") {
+                  unfocusConfigurationButtons();
+                  lastDrawenConfiguration = 1;
+                  const button = document.getElementById(`configuration-${lastDrawenConfiguration}`);
+                  button.style.backgroundColor = "black";
+                  button.style.color = "white";
+                  button.click();
+                }
+
+                if (event.key === "c") {
+                  clearAndStop();
+                }
+              });
+
+
+            </script>
+          </div>
+          <div style="flex-grow: 1">
+            <canvas
+              id="canvas-element"
+              style="width: 100%; height: 100%;"
+            >
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </main>
+
+
+
+    <script>
+      let startButton = document.getElementById("start");
+      let clearButton = document.getElementById("clear");
+
+      let drawer = new Drawer("canvas-element");
+
+      function ValidateAndDraw(){
+        const numberOfPoints = document.querySelector( "input[name='number-of-points']").value;
+        const factor = document.querySelector("input[name='factor']").value;
+        const radius = document.querySelector("input[name='radius']").value;
+        const avoidLast = document.querySelector("input[name='avoid-last']").value;
+        const avoidBackward = document.querySelector("input[name='avoid-backward']").value;
+        const avoidForward = document.querySelector("input[name='avoid-forward']").value;
+        const centeralizeX = document.querySelector("input[name='centeralize-x']").value;
+        const centeralizeY = document.querySelector("input[name='centeralize-y']").value;
+
+        const coloring = document.querySelector("input[name='coloring']").checked; // no need for validation
+
+        if (!Validator.convertableToPositiveInteger(numberOfPoints) || parseInt(numberOfPoints) < 3) {
+          alert("Number of points must be a positive integer greater than 2");
+          return;
+        }
+        if (!Validator.convertableToPositiveInteger(radius)){
+          alert("Radius must be a positive integer");
+          return;
+        }
+
+        if (!Validator.isConvertableToOneOrNegativeOne(avoidLast)){
+          alert("Avoid last must be a +1 or -1");
+          return;
+        }
+
+        if (!Validator.convertableToPositiveIntegerOrNegativeOne(avoidBackward)){
+          alert("Avoid backward must be a positive integer or -1");
+          return;
+        }
+        
+        if (!Validator.convertableToPositiveIntegerOrNegativeOne(avoidForward)){
+          alert("Avoid forward must be a positive integer or -1");
+          return;
+        }
+
+        if (!Validator.convertableToPositiveNumber(factor)){
+          alert("Factor must be a positive number");
+          return;
+        }
+
+        if (!Validator.convertableToInteger(centeralizeX) || !Validator.convertableToInteger(centeralizeY)){
+          alert("CenteralizeX and CenteralizeY must be integers");
+          return;
+        }
+
+        drawer.clear();
+
+        const colors = [];
+        for (let i = 0; i < numberOfPoints; i++) {
+          // generate random colors in hex format
+          colors.push("#" + Math.floor(Math.random() * 16777215).toString(16));
+        }
+
+        const chunckSize = 1500;
+
+        // put values into an object and convert them to integers
+        const configuration = {
+          repeat: chunckSize,
+          numberOfPoints: parseInt(numberOfPoints),
+          radius: parseInt(radius),
+          factor: parseFloat(factor),
+          avoidBackward: parseInt(avoidBackward),
+          avoidForward: parseInt(avoidForward),
+          centralizeX: window.innerWidth,
+          centralizeY: window.innerHeight,
+          avoidLast: avoidLast,
+          coloring: coloring,
+          colors: colors,
+        };
+
+        let chaosGame = new ChaosGame(drawer, configuration);
+        
+        if (drawingProcess) {
+          clearInterval(drawingProcess);
+        }
+
+        drawingProcess = setInterval(() => {
+          chaosGame.start();
+        }, 8);
+      }
+      
+      function clearAndStop(){
+        drawer.clear();
+        clearInterval(drawingProcess);
+      }
+      
+      startButton.addEventListener("click", ValidateAndDraw);
+      clearButton.addEventListener("click", clearAndStop);
+
+    </script>
+  </body>
+</html>
